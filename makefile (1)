@@ -1,0 +1,27 @@
+.PHONY: all clean
+CXX=gcc
+CPP=g++
+FLAGS=-Wall -g
+
+all:main1_test singleton_test selectclient selectserver guard_test client lib.so
+main1_test: main1_test.c libc.so
+	$(CXX) $(FLAGS) -o main1_test main1_test.c ./libc.so -lpthread
+guard_test: guard_test.cpp lib.so
+	$(CPP) $(FLAGS) -o guard_test guard_test.cpp ./lib.so -lpthread
+selectserver: selectserver.cpp lib.so
+	$(CPP) $(FLAGS) -o selectserver selectserver.cpp ./lib.so -lpthread
+singleton_test: singleton_test.cpp lib.so
+	$(CPP) $(FLAGS) -o singleton_test singleton_test.cpp ./lib.so -lpthread
+lib.so: singleton.cpp reactor.cpp guard.cpp client.cpp
+	$(CPP) --shared -fPIC -lpthread -o lib.so singleton.cpp reactor.cpp guard.cpp client.cpp
+libc.so: main1.c 
+	$(CXX) --shared -fPIC -lpthread -o libc.so main1.c
+client: client.o
+	$(CPP) $(FLAGS) -o client client.o
+client.o: client.cpp
+	$(CPP) $(FLAGS) -c client.cpp -o client.o
+selectclient: selectclient.cpp
+	$(CPP) $(FLAGS) -o selectclient selectclient.cpp
+
+clean:
+	rm -f *.o main1_test singleton_test selectclient selectserver guard_test client lib.so libc.so
